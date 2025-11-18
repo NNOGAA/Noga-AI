@@ -21,7 +21,7 @@ ALLERGEN_KEYWORDS = [
 
 def parse_value(nut: Dict[str, Any]) -> Tuple[float, str]:
     try:
-        nilai = nut.get("nilai", 0)
+        nilai = nut.get("value") or nut.get("nilai", 0)
         unit = nut.get("type", "").lower()
         return float(nilai), unit
     except (ValueError, TypeError):
@@ -54,25 +54,25 @@ def normalize_functions(raw: List[Dict[str, str]]) -> List[Dict[str, str]]:
     }
     normalized: Dict[str, Dict[str, str]] = {}
     for item in raw:
-        name = item.get("nama", "").strip().lower()
+        name = (item.get("name") or item.get("nama", "")).strip().lower()
         norm_name = aliases.get(name)
         if norm_name:
             normalized[norm_name] = {
-                "nama": norm_name,
-                "nilai": item.get("nilai", "0"),
+                "name": norm_name,
+                "value": item.get("value") or item.get("nilai", "0"),
                 "type": item.get("type", ""),
             }
     for nutrient in MAIN_ORDER:
         if nutrient not in normalized:
             normalized[nutrient] = {
-                "nama": nutrient,
-                "nilai": "0",
+                "name": nutrient,
+                "value": "0",
                 "type": "" if nutrient in {"serving size", "calories"} else "g"
             }
 
     return [normalized[n] for n in MAIN_ORDER] + [
         item for item in raw
-        if aliases.get(item.get("nama", "").lower(), None) not in MAIN_ORDER
+        if aliases.get((item.get("name") or item.get("nama", "")).lower(), None) not in MAIN_ORDER
     ]
 
 
@@ -96,7 +96,7 @@ def make_summary(data: Dict[str, Any]) -> Dict[str, Any]:
     sugar_amt = sugar_unit = None
     sodium_amt = sodium_unit = None
     for nut in data.get("nutrition_info", []):
-        name = nut.get("nama", "").lower()
+        name = (nut.get("name") or nut.get("nama", "")).lower()
         num, unit = parse_value(nut)
 
         if name in ("sugar", "sugars"):
