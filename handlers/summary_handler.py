@@ -99,13 +99,9 @@ def summarize_food_labels(
             "detail": ""
         }
 
-    print(f"Input: {data}")
     summary = make_summary(data)
 
-    response = {
+    return {
         "status": "success",
         "data": summary
     }
-    print(f"Response: {response}")
-
-    return response

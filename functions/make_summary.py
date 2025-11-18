@@ -10,7 +10,6 @@ from dotenv import load_dotenv
 load_dotenv()
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
-# Inisialisasi model Gemini 2.0 Flash
 _GEMINI = genai.GenerativeModel("gemini-2.0-flash")
 
 ALLERGEN_KEYWORDS = [
@@ -77,7 +76,6 @@ def normalize_functions(raw: List[Dict[str, str]]) -> List[Dict[str, str]]:
 
 
 def make_summary(data: Dict[str, Any]) -> Dict[str, Any]:
-    # count ingredient statuses and detect allergens
     good = neutral = bad = 0
     allergens: List[str] = []
     for ing in data.get("ingredients", []):
@@ -90,7 +88,6 @@ def make_summary(data: Dict[str, Any]) -> Dict[str, Any]:
         if any(keyword in detail for keyword in ALLERGEN_KEYWORDS):
             allergens.append(ing.get("name", ""))
 
-    # sugar & salt metrics
     high_sugar = mid_sugar = low_sugar = False
     high_salt = False
     sugar_amt = sugar_unit = None
@@ -110,12 +107,11 @@ def make_summary(data: Dict[str, Any]) -> Dict[str, Any]:
             if (unit == "mg" and num >= 2000) or (unit == "g" and num > 2):
                 high_salt = True
 
-    # vitamin detection
     vitamins = [ing.get("name", "") for ing in data.get("ingredients", [])
                 if ing.get("name", "").lower().startswith("vitamin")]
     vitamins_rich = bool(vitamins)
 
-    # AI: detect preservatives
+    # Gemini AI call: detect preservatives
     pres_prompt = f"""
 You are an expert nutritionist. Given the product JSON below,
 return a Python literal dict with key "preservatives_detected" listing any preservatives found.
@@ -160,7 +156,7 @@ Product JSON:
         "Preservatives": "Yes" if preservatives else "No"
     }
 
-    # AI: generate explanations
+    # Gemini AI call: generate health explanations
     explain_prompt = f"""
 You are an expert nutritionist. For the given product JSON and its summary statuses below,
 provide a brief explanation for each status, including why it was assigned and health implications.
@@ -174,7 +170,6 @@ Summary Statuses:
 """
     explain_resp = _GEMINI.generate_content(explain_prompt)
     resp_text = explain_resp.text
-    # strip markdown fences if present
     if resp_text.startswith("```"):
         resp_text = re.sub(r"^```[a-zA-Z]*\n", "", resp_text)
         resp_text = re.sub(r"```$", "", resp_text)
@@ -184,7 +179,6 @@ Summary Statuses:
     except:
         pass
 
-    # build final summary with AI explanations
     summary_obj: Dict[str, Any] = {}
     for key, stat in summary_statuses.items():
         summary_obj[key] = {
