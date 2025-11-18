@@ -88,7 +88,7 @@ def make_summary(data: Dict[str, Any]) -> Dict[str, Any]:
 
         detail = ing.get("detail", "").lower()
         if any(keyword in detail for keyword in ALLERGEN_KEYWORDS):
-            allergens.append(ing.get("nama", ""))
+            allergens.append(ing.get("name", ""))
 
     # sugar & salt metrics
     high_sugar = mid_sugar = low_sugar = False
@@ -111,8 +111,8 @@ def make_summary(data: Dict[str, Any]) -> Dict[str, Any]:
                 high_salt = True
 
     # vitamin detection
-    vitamins = [ing.get("nama", "") for ing in data.get("ingredients", [])
-                if ing.get("nama", "").lower().startswith("vitamin")]
+    vitamins = [ing.get("name", "") for ing in data.get("ingredients", [])
+                if ing.get("name", "").lower().startswith("vitamin")]
     vitamins_rich = bool(vitamins)
 
     # AI: detect preservatives
@@ -127,11 +127,11 @@ Product JSON:
     pres_resp = _GEMINI.generate_content(pres_prompt)
     try:
         pres_eval = ast.literal_eval(pres_resp.text)
-        preservatives = [p.get("nama", "") for p in pres_eval.get("preservatives_detected", [])]
+        preservatives = [p.get("name", "") for p in pres_eval.get("preservatives_detected", [])]
     except:
         preservatives = []
 
-    top5 = [ing.get("nama", "") for ing in data.get("ingredients", [])[:5]]
+    top5 = [ing.get("name", "") for ing in data.get("ingredients", [])[:5]]
     dairy_kw = {"milk","cheese","yogurt","cream","whey","casein","lactose"}
     dairy_count = sum(any(k in n.lower() for k in dairy_kw) for n in top5)
     dairy_based = dairy_count >= 2
