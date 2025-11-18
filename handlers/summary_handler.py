@@ -45,8 +45,7 @@ def summarize_food_labels(
         nutrition_info.append({
             "name": nut.get("name") or nut.get("nama", ""),
             "value": nut.get("value") or nut.get("nilai", ""),
-            "type": nut.get("type", ""),
-            "status": nut.get("status", "")
+            "type": nut.get("type", "")
         })
 
     data["ingredients"] = ingredients
