@@ -101,7 +101,7 @@ def make_summary(data: Dict[str, Any]) -> Dict[str, Any]:
 
         if name in ("sugar", "sugars"):
             sugar_amt, sugar_unit = num, unit
-            if unit.startswith("gram"):
+            if unit in ("g", "gram", "grams"):
                 if   num >= 22.5: high_sugar = True
                 elif num > 5:     mid_sugar  = True
                 else:             low_sugar  = True
