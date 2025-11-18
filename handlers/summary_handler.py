@@ -22,6 +22,41 @@ def _classify(name: str) -> tuple:
     return "neutral", "No clear consensus exists yet. Best consumed in moderation."
 
 
+def _classify_nutrition(name: str, value: str, unit: str) -> str:
+    try:
+        val = float(value)
+    except (ValueError, TypeError):
+        return "neutral"
+
+    name_lower = name.lower()
+    unit_lower = unit.lower()
+
+    if name_lower in ("sugar", "sugars"):
+        if unit_lower in ("g", "gram", "grams"):
+            if val >= 22.5: return "bad"
+            elif val > 5: return "neutral"
+            else: return "good"
+
+    elif name_lower in ("sodium", "salt", "natrium"):
+        if unit_lower == "mg" and val >= 2000: return "bad"
+        elif unit_lower in ("g", "gram", "grams") and val >= 2: return "bad"
+        else: return "good"
+
+    elif name_lower in ("saturated fat", "lemak jenuh"):
+        if unit_lower in ("g", "gram", "grams") and val > 5: return "bad"
+        else: return "neutral"
+
+    elif name_lower in ("trans fat"):
+        if val > 0: return "bad"
+        else: return "good"
+
+    elif name_lower in ("protein"):
+        if unit_lower in ("g", "gram", "grams") and val >= 10: return "good"
+        else: return "neutral"
+
+    return "neutral"
+
+
 def summarize_food_labels(
     data: Dict[str, Any]
 ) -> Optional[Dict[str, Union[None, str, List[Any]]]]:
@@ -42,10 +77,16 @@ def summarize_food_labels(
 
     nutrition_info = []
     for nut in data.get("nutrition_info", []):
+        name = nut.get("name") or nut.get("nama", "")
+        value = nut.get("value") or nut.get("nilai", "")
+        unit = nut.get("type", "")
+        status = _classify_nutrition(name, value, unit)
+
         nutrition_info.append({
-            "name": nut.get("name") or nut.get("nama", ""),
-            "value": nut.get("value") or nut.get("nilai", ""),
-            "type": nut.get("type", "")
+            "name": name,
+            "value": value,
+            "type": unit,
+            "status": status
         })
 
     data["ingredients"] = ingredients
