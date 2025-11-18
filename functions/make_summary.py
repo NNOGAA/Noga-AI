@@ -10,8 +10,8 @@ from dotenv import load_dotenv
 load_dotenv()
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
-# Inisialisasi model Gemini 1.5 Flash
-_GEMINI = genai.GenerativeModel("gemini-1.5-flash")
+# Inisialisasi model Gemini 2.0 Flash
+_GEMINI = genai.GenerativeModel("gemini-2.0-flash")
 
 ALLERGEN_KEYWORDS = [
     "allergen", "allergenic", "may cause allergies", "may trigger allergies",
